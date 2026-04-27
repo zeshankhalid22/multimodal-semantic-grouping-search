@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Admin · FYP CLIP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --nav:#111827;--bg:#0f172a;--surf:#1e293b;--s2:#273549;--bdr:#334155;
+  --acc:#6366f1;--accd:#4f46e5;--tx:#f1f5f9;--mu:#94a3b8;
+  --ok:#10b981;--err:#ef4444;--warn:#f59e0b;
+}
+body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--tx);display:flex;height:100vh;overflow:hidden}
+
+/* ── Nav ── */
+nav{width:220px;min-width:220px;background:var(--nav);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto}
+.logo{padding:18px 16px;font-size:15px;font-weight:700;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.logo span{color:var(--acc)}
+.nav-sec{padding:16px 16px 4px;font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em}
+nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:7px;color:var(--mu);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none}
+nav a:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+nav a.active{background:rgba(99,102,241,.18);color:var(--acc)}
+nav a svg{width:15px;height:15px;flex-shrink:0}
+.badge-soon{margin-left:auto;font-size:9px;font-weight:600;background:var(--s2);color:var(--mu);padding:2px 5px;border-radius:4px}
+
+/* ── Content ── */
+.content{flex:1;overflow-y:auto;background:var(--bg)}
+.page{padding:28px 32px;display:none}
+.page.active{display:block}
+.ph{margin-bottom:22px}
+.ph h2{font-size:20px;font-weight:700}
+.ph p{font-size:13px;color:var(--mu);margin-top:3px}
+
+/* ── Stat cards ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.sc{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:18px 20px}
+.sc .lbl{font-size:11px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.sc .val{font-size:28px;font-weight:700}
+.sc .sub{font-size:11px;color:var(--mu);margin-top:3px}
+
+/* ── Breakdown/Box ── */
+.bk{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:18px 20px;margin-bottom:20px}
+.bk h3{font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.bk-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
+.bk-row .nm{min-width:100px;white-space:nowrap}
+.bk-row .bar{flex:1;height:5px;background:var(--bdr);border-radius:3px;overflow:hidden}
+.bk-row .fill{height:100%;border-radius:3px;transition:width .5s}
+.fill-acc{background:var(--acc)}.fill-ok{background:var(--ok)}
+.bk-row .ct{font-size:12px;color:var(--mu);min-width:55px;text-align:right}
+
+/* ── Config form ── */
+details{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-bottom:14px}
+summary{font-size:13px;font-weight:600;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:8px}
+summary::before{content:"▸";font-size:10px;color:var(--mu);transition:transform .2s}
+details[open] summary::before{transform:rotate(90deg)}
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.f{display:flex;flex-direction:column;gap:4px}
+.f.s2{grid-column:span 2}.f.full{grid-column:1/-1}
+label{font-size:10px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{background:var(--bg);border:1px solid var(--bdr);border-radius:6px;color:var(--tx);padding:7px 9px;font-size:12px;font-family:inherit;outline:none;width:100%;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+input::placeholder,textarea::placeholder{color:var(--mu);opacity:.5}
+textarea{resize:vertical}
+input[type=range]{accent-color:var(--acc);padding:0}
+
+/* ── Buttons ── */
+.btn{padding:8px 14px;border-radius:7px;border:none;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.35;cursor:not-allowed}
+.acc{background:var(--acc);color:#fff}.acc:hover:not(:disabled){background:var(--accd)}
+.ok{background:var(--ok);color:#fff}.ok:hover:not(:disabled){opacity:.85}
+.danger{background:var(--err);color:#fff}.danger:hover:not(:disabled){opacity:.85}
+.ghost{background:var(--s2);color:var(--tx);border:1px solid var(--bdr)}.ghost:hover:not(:disabled){background:var(--bdr)}
+
+/* ── Toolbar ── */
+.tb{display:flex;align-items:center;gap:8px;padding:10px 0;margin-bottom:12px;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.tb-count{font-size:12px;color:var(--mu);margin-right:4px}
+.tb-stat{font-size:11px;padding:4px 10px;border-radius:20px;display:inline-block}
+.tb-stat.ok{color:var(--ok);background:rgba(16,185,129,.12)}
+.tb-stat.err{color:var(--err);background:rgba(239,68,68,.12)}
+.tb-stat.busy{color:var(--acc);background:rgba(99,102,241,.12)}
+.tb-stat.warn{color:var(--warn);background:rgba(245,158,11,.12)}
+
+/* ── Product grid ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;position:relative;cursor:pointer;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--acc);transform:translateY(-1px)}
+.card.sel{border-color:var(--acc);background:rgba(99,102,241,.07)}
+.card input[type=checkbox]{position:absolute;top:8px;left:8px;width:16px;height:16px;accent-color:var(--acc);z-index:1}
+.card img{width:100%;height:145px;object-fit:contain;background:var(--s2);padding:8px;display:block}
+.cb{padding:9px 11px 11px}
+.asn{display:inline-block;font-size:10px;font-weight:600;color:var(--acc);background:rgba(99,102,241,.15);padding:1px 6px;border-radius:4px;margin-bottom:4px;letter-spacing:.04em}
+.ct{font-size:12px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:5px}
+.cm{display:flex;gap:8px;font-size:11px;color:var(--mu);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.chip{font-size:10px;padding:2px 5px;background:var(--s2);border-radius:4px;color:var(--mu);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.card-del{position:absolute;top:6px;right:6px;background:rgba(239,68,68,.85);color:#fff;border:none;border-radius:4px;font-size:10px;padding:2px 6px;cursor:pointer;display:none}
+.card:hover .card-del{display:block}
+
+/* ── Misc ── */
+.empty-msg{text-align:center;padding:60px 20px;color:var(--mu);font-size:14px}
+.empty-msg strong{color:var(--tx)}
+.ph-box{background:var(--surf);border:1px dashed var(--bdr);border-radius:10px;padding:40px;text-align:center;color:var(--mu);font-size:13px}
+.err-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px}
+.err-box .err-title{font-weight:600;color:var(--err);margin-bottom:6px}
+.err-box ul{padding-left:14px;color:var(--tx);line-height:1.8}
+.warn-list{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--warn)}
+.hidden{display:none!important}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:4px}
+
+/* ── Scraper ── */
+.qry-grid{display:grid;grid-template-columns:180px 1fr;gap:12px;margin-top:14px}
+.qry-cat-btn{width:100%;padding:7px 10px;background:var(--s2);border:1px solid var(--bdr);border-radius:6px;color:var(--mu);font-size:12px;font-weight:500;cursor:pointer;text-align:left;transition:all .15s;margin-bottom:4px}
+.qry-cat-btn:hover,.qry-cat-btn.qactive{background:rgba(99,102,241,.15);color:var(--acc);border-color:var(--acc)}
+.res-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.res-table th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bdr)}
+.res-table td{padding:7px 10px;border-bottom:1px solid rgba(51,65,85,.4);vertical-align:top;line-height:1.4}
+.res-table tr.sel td{background:rgba(99,102,241,.06)}
+.res-table tr:hover td{background:rgba(255,255,255,.02)}
+.asin-tag{color:var(--acc);font-weight:600;font-size:11px}
+.cat-tag{display:inline-block;padding:1px 6px;border-radius:4px;background:rgba(16,185,129,.12);color:var(--ok);font-size:10px;font-weight:600}
+
+/* ── Pipeline stages ── */
+.stage-bar{display:flex;margin-bottom:18px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr)}
+.stage{flex:1;padding:8px 12px;font-size:11px;font-weight:600;text-align:center;color:var(--mu);background:var(--s2);border-right:1px solid var(--bdr);cursor:default}
+.stage:last-child{border-right:none}
+.stage.done{color:var(--ok);background:rgba(16,185,129,.1)}
+.stage.active{color:var(--acc);background:rgba(99,102,241,.15)}
+
+/* ── Attribute analysis ── */
+.attr-section{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:18px 20px;margin-top:14px}
+.attr-section h3{font-size:12px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.attr-table{width:100%;border-collapse:collapse;font-size:12px}
+.attr-table th{text-align:left;padding:6px 8px;font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bdr)}
+.attr-table td{padding:6px 8px;border-bottom:1px solid rgba(51,65,85,.35);vertical-align:middle}
+.attr-table tr.rec td{background:rgba(16,185,129,.04)}
+.freq-bar-wrap{width:90px;background:var(--s2);border-radius:3px;height:6px;overflow:hidden}
+.freq-bar{height:6px;border-radius:3px;background:var(--ok)}
+.freq-bar.low{background:var(--acc)}
+.diag-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.dpill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;background:var(--s2);border:1px solid var(--bdr)}
+
+/* ── Pagination ── */
+.page-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--bdr);background:var(--s2);color:var(--mu);font-size:12px;cursor:pointer}
+.page-btn.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.page-btn:hover:not(.active){background:var(--bdr)}
+
+/* ── Products browse toolbar ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.filter-bar select{width:160px}
+.filter-bar input{flex:1;min-width:180px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">FYP <span>Admin</span></div>
+
+  <div class="nav-sec">Overview</div>
+  <a data-page="dashboard" onclick="go('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </a>
+
+  <div class="nav-sec">Data</div>
+  <a data-page="scrape" onclick="go('scrape')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Scrape
+  </a>
+  <a data-page="import" onclick="go('import')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Import
+  </a>
+  <a data-page="products" onclick="go('products')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    Products
+  </a>
+
+  <div class="nav-sec">System</div>
+  <a data-page="settings" onclick="go('settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+    Settings
+  </a>
+</nav>
+
+<div class="content">
+
+  <!-- ── Dashboard ── -->
+  <div id="p-dashboard" class="page">
+    <div class="ph"><h2>Dashboard</h2><p>Live overview of the product database</p></div>
+    <div class="stat-grid">
+      <div class="sc"><div class="lbl">Total Products</div><div class="val" id="s-total">—</div><div class="sub" id="s-total-sub"></div></div>
+      <div class="sc"><div class="lbl">Categories</div><div class="val" id="s-cats">—</div></div>
+      <div class="sc"><div class="lbl">Platforms</div><div class="val" id="s-plats">—</div></div>
+    </div>
+    <div class="bk" id="bk-platforms"></div>
+    <div class="bk" id="bk-categories"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn acc" onclick="go('import')">Import Products →</button>
+      <button class="btn ghost" onclick="go('products')">Browse Products →</button>
+    </div>
+  </div>
+
+  <!-- ── Scrape ── -->
+  <div id="p-scrape" class="page">
+    <div class="ph"><h2>Scrape Amazon</h2><p>Search Amazon for products, pick cards, then scrape full detail pages into <code>Data/</code></p></div>
+
+    <!-- Browser health -->
+    <div id="browser-status" class="hidden" style="margin-bottom:12px;padding:8px 12px;border-radius:8px;font-size:12px;border:1px solid"></div>
+
+    <!-- A: Query Manager -->
+    <details open>
+      <summary>Query Manager</summary>
+      <div class="qry-grid">
+        <div>
+          <div id="qry-cats"></div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <input id="new-cat-input" placeholder="New category…" style="flex:1;width:auto" onkeydown="if(event.key==='Enter'){event.preventDefault();addQryCat()}">
+            <button class="btn ghost" style="padding:7px 10px;flex-shrink:0" onclick="addQryCat()">+ Add</button>
+          </div>
+        </div>
+        <div>
+          <label>Queries for <strong id="qry-active-lbl" style="color:var(--acc)">—</strong> <small style="color:var(--mu);font-weight:400;text-transform:none">(one per line)</small></label>
+          <textarea id="qry-ta" rows="7" placeholder="Select a category on the left…" disabled
+            oninput="if(activeCat){scraperQueries[activeCat]=this.value.split('\n').map(s=>s.trim()).filter(Boolean);renderCatList()}">
+          </textarea>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button class="btn ghost" id="btnDelCat" style="color:var(--err)" onclick="delQryCat()" disabled>Remove Category</button>
+            <button class="btn acc" style="margin-left:auto" onclick="saveQueries()">Save Queries</button>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- B: Search -->
+    <div class="tb">
+      <span class="tb-count" id="sc-count">Ready to search</span>
+      <button class="btn acc" id="btnSearch" onclick="runSearch()">Search Amazon</button>
+      <span id="sc-stat" class="tb-stat hidden"></span>
+    </div>
+    <div id="sc-sel-bar" class="hidden" style="margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <label style="text-transform:none;font-size:12px;color:var(--mu)">Select top</label>
+      <input id="topN" type="number" value="10" min="1" style="width:60px">
+      <button class="btn ghost" onclick="selectTopN()">Apply</button>
+      <button class="btn ghost" onclick="clearSearchSel()">Clear</button>
+      <button class="btn ok" id="btnScrapeD" onclick="runScrape()" disabled style="margin-left:auto">Scrape Selected →</button>
+    </div>
+    <div id="sc-table-wrap" class="hidden">
+      <table class="res-table">
+        <thead><tr>
+          <th><input type="checkbox" id="sc-all" onchange="toggleAllSearch(this)"></th>
+          <th>Image</th><th>ASIN</th><th>Title</th><th>Category</th><th>Price</th>
+        </tr></thead>
+        <tbody id="sc-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- C: Scrape results -->
+    <div id="sc-files" class="hidden" style="margin-top:16px">
+      <div class="bk" id="sc-files-inner"></div>
+      <button class="btn acc" style="margin-top:10px" onclick="go('import')">→ Open Import to extract these HTMLs</button>
+    </div>
+  </div>
+
+  <!-- ── Import ── -->
+  <div id="p-import" class="page">
+    <div class="ph"><h2>Import Products</h2><p>4-step pipeline: Extract → Analyze → Filter → Ingest</p></div>
+
+    <div class="stage-bar">
+      <div class="stage active" id="st-1">1 · Extract</div>
+      <div class="stage" id="st-2">2 · Analyze</div>
+      <div class="stage" id="st-3">3 · Filter</div>
+      <div class="stage" id="st-4">4 · Ingest</div>
+    </div>
+
+    <details open>
+      <summary>Configuration</summary>
+      <div style="margin-top:12px;margin-bottom:10px">
+        <label>Pick from Data/ folder <small style="text-transform:none;font-weight:400;color:var(--mu)">(click to auto-fill)</small></label>
+        <div id="data-cat-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+        <button class="btn ghost" style="margin-top:6px;font-size:11px;padding:4px 8px" onclick="refreshDataCats(event)">↻ Refresh</button>
+      </div>
+      <form id="cfg" onsubmit="doExtract(event)">
+        <div class="fg">
+          <div class="f"><label>Extractor</label>
+            <select name="extractor"><option value="amazon">Amazon</option><option disabled>Walmart (soon)</option></select>
+          </div>
+          <div class="f"><label>HTML Directory <small style="text-transform:none;font-weight:400">(category folder)</small></label>
+            <input name="html_dir" placeholder="Data/Bags" required>
+          </div>
+          <div class="f"><label>Category <small style="text-transform:none;font-weight:400">(auto from folder)</small></label>
+            <input name="category" placeholder="auto">
+          </div>
+          <div class="f"><label>Max Attributes</label><input name="max_attrs" type="number" value="15" min="1" max="50"></div>
+          <div class="f"><label>Platform</label><input name="platform" value="amazon"></div>
+          <div class="f s2"><label>Include Fields <small style="text-transform:none;font-weight:400">(comma-sep, must-have)</small></label>
+            <input name="include" placeholder="Department, Manufacturer">
+          </div>
+          <div class="f"><label>Exclude Fields</label><input name="exclude" placeholder="e.g. Dimensions, Color"></div>
+        </div>
+        <p style="font-size:11px;color:var(--mu);margin-top:8px">
+          Images → <code>&lt;html_dir&gt;/images/</code> &nbsp;·&nbsp; JSON → <code>&lt;html_dir&gt;/&lt;folder&gt;.json</code>
+        </p>
+        <div style="margin-top:12px">
+          <button type="submit" class="btn acc" id="btnX">Extract Products</button>
+        </div>
+      </form>
+    </details>
+
+    <div class="tb hidden" id="tb">
+      <span class="tb-count" id="tb-count"></span>
+      <button class="btn ghost" onclick="toggleAll()">Select All</button>
+      <button class="btn danger" id="btnD" onclick="deleteSelected()" disabled>Remove Selected</button>
+      <button class="btn ghost" id="btnAnalyze" onclick="analyzeAttrs()">Analyze Attributes</button>
+      <button class="btn ok" id="btnIngest" onclick="ingestAll()">Ingest to DB</button>
+      <span id="tb-stat" class="tb-stat hidden"></span>
+    </div>
+
+    <div id="err-box" class="hidden"></div>
+
+    <!-- Attribute analysis section (step 2+3) -->
+    <div id="attr-section" class="attr-section hidden">
+      <h3>Attribute Frequency Analysis</h3>
+      <div class="diag-pills" id="diag-pills"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <label style="text-transform:none;font-size:12px;min-width:130px">Threshold: <strong id="thr-val">50</strong>%</label>
+        <input type="range" id="thr-slider" min="1" max="100" value="50" style="flex:1;max-width:300px" oninput="onThrChange(this.value)">
+        <button class="btn ghost" onclick="reAnalyze()">↻ Recompute</button>
+        <button class="btn ok" id="btnApplyFilter" onclick="applyFilter()">Apply Filter &amp; Prepare Ingest</button>
+      </div>
+      <table class="attr-table">
+        <thead><tr>
+          <th><input type="checkbox" id="attr-all" onchange="toggleAllAttrs(this)" title="Select all"></th>
+          <th>Attribute</th><th>Frequency</th><th>%</th>
+        </tr></thead>
+        <tbody id="attr-tbody"></tbody>
+      </table>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div id="empty-msg" class="empty-msg"><strong>No products yet.</strong><br>Select a category above and click Extract Products.</div>
+  </div>
+
+  <!-- ── Products (DB Browser) ── -->
+  <div id="p-products" class="page">
+    <div class="ph"><h2>Products</h2><p>Browse and manage all products in the database</p></div>
+    <div class="filter-bar">
+      <select id="prd-cat" onchange="loadDbProducts(1)">
+        <option value="all">All Categories</option>
+      </select>
+      <input id="prd-search" placeholder="Search by title…" oninput="clearTimeout(_prdTimer);_prdTimer=setTimeout(()=>loadDbProducts(1),400)">
+      <button class="btn ghost" onclick="loadDbProducts(1)">Search</button>
+      <span class="tb-count" id="prd-total"></span>
+      <span id="prd-stat" class="tb-stat hidden"></span>
+    </div>
+    <div id="prd-grid" class="grid"></div>
+    <div id="prd-pages" style="display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap"></div>
+    <div id="prd-empty" class="empty-msg hidden"><strong>No products found.</strong><br>Try adjusting your search or category filter.</div>
+  </div>
+
+  <!-- ── Settings ── -->
+  <div id="p-settings" class="page">
+    <div class="ph"><h2>Settings</h2><p>Configure scraper, extractor, and pipeline defaults</p></div>
+
+    <div class="bk">
+      <h3>Scraper</h3>
+      <div class="fg">
+        <div class="f"><label>Page Sleep (s) <small style="text-transform:none;font-weight:400">between requests</small></label>
+          <input id="cfg-sleep" type="number" step="0.5" min="0.5">
+        </div>
+        <div class="f"><label>Max Pages / Query</label>
+          <input id="cfg-maxpages" type="number" min="1">
+        </div>
+        <div class="f s2"><label>Browser Binary</label>
+          <input id="cfg-binary" placeholder="/usr/bin/microsoft-edge">
+        </div>
+      </div>
+    </div>
+
+    <div class="bk">
+      <h3>Extractor &amp; Analysis</h3>
+      <div class="fg">
+        <div class="f"><label>Analysis Threshold % <small style="text-transform:none;font-weight:400">attributes below this are excluded</small></label>
+          <input id="cfg-threshold" type="number" min="1" max="100">
+        </div>
+        <div class="f"><label>Default Max Attributes</label>
+          <input id="cfg-maxattrs" type="number" min="5" max="50">
+        </div>
+        <div class="f"><label>Default Platform</label>
+          <input id="cfg-platform">
+        </div>
+      </div>
+    </div>
+
+    <div class="bk">
+      <h3>Paths</h3>
+      <div class="fg">
+        <div class="f s2"><label>Data Directory</label>
+          <input id="cfg-datadir">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:4px">
+      <button class="btn acc" onclick="saveSettings()">Save Settings</button>
+      <button class="btn ghost" onclick="loadSettings()">Reset to Saved</button>
+      <span id="settings-stat" class="tb-stat hidden"></span>
+    </div>
+  </div>
+
+</div><!-- .content -->
+
+<script>
+// ── Routing ───────────────────────────────────────────────────────────────────
+const PAGES = ['dashboard','scrape','import','products','settings'];
+let _scraperLoaded=false, _productsLoaded=false, _settingsLoaded=false;
+
+function go(id) {
+  PAGES.forEach(p => {
+    document.getElementById('p-'+p).classList.toggle('active', p===id);
+    const lnk = document.querySelector(`[data-page="${p}"]`);
+    if (lnk) lnk.classList.toggle('active', p===id);
+  });
+  if (id==='dashboard') fetchStats();
+  /* if (id==='scrape' && !_scraperLoaded) { _scraperLoaded=true; loadQueries(); checkBrowser(); } */
+  if (id==='import') refreshDataCats();
+  if (id==='products') { loadDbProductCategories(); loadDbProducts(1); }
+  if (id==='settings' && !_settingsLoaded) { _settingsLoaded=true; loadSettings(); }
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function fetchStats() {
+  try {
+    const d = await api('GET','/admin/stats');
+    document.getElementById('s-total').textContent = d.total.toLocaleString();
+    document.getElementById('s-total-sub').textContent = 'across '+d.category_count+' categories';
+    document.getElementById('s-cats').textContent = d.category_count;
+    document.getElementById('s-plats').textContent = d.platform_count;
+    renderBreakdown('bk-platforms','Platforms',d.platforms,'fill-acc');
+    renderBreakdown('bk-categories','Categories',d.categories.slice(0,8),'fill-ok');
+  } catch(e) { document.getElementById('s-total').textContent='Error'; }
+}
+
+function renderBreakdown(elId,title,rows,fillCls) {
+  const max = rows[0]?.count||1;
+  document.getElementById(elId).innerHTML = `<h3>${title}</h3>`+rows.map(r=>`
+    <div class="bk-row">
+      <span class="nm">${r.name||'—'}</span>
+      <div class="bar"><div class="fill ${fillCls}" style="width:${Math.round(r.count/max*100)}%"></div></div>
+      <span class="ct">${r.count.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+// ── Browser health check ───────────────────────────────────────────────────────
+async function checkBrowser() {
+  try {
+    const h = await api('GET','/scraper/health');
+    const el = document.getElementById('browser-status');
+    if (h.ok) {
+      el.style.cssText='background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3);color:var(--ok)';
+      el.textContent = '✓ Browser ready: '+h.binary;
+    } else {
+      el.style.cssText='background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);color:var(--err)';
+      el.textContent = '✗ Browser not found at '+h.binary+' — scraping will fail';
+    }
+    el.classList.remove('hidden');
+  } catch(e) {}
+}
+
+// ── Import ─────────────────────────────────────────────────────────────────────
+let jsonFile='';
+const splitTrim = s => s ? s.split(',').map(x=>x.trim()).filter(Boolean) : [];
+
+function setPipStage(n) { // 1-4
+  for(let i=1;i<=4;i++) {
+    const el=document.getElementById('st-'+i);
+    el.className = 'stage'+(i<n?' done':i===n?' active':'');
+  }
+}
+
+function setStatus(msg,type='') {
+  const el=document.getElementById('tb-stat');
+  el.textContent=msg; el.className='tb-stat '+(type||''); el.classList.remove('hidden');
+}
+
+function setLoading(on) {
+  const b=document.getElementById('btnX');
+  b.disabled=on; b.innerHTML=on?'<span class="spin"></span>Extracting…':'Extract Products';
+}
+
+function getSelected() {
+  return [...document.querySelectorAll('#grid .card input:checked')].map(c=>c.closest('.card').dataset.asin);
+}
+
+function toggleAll() {
+  const boxes=[...document.querySelectorAll('#grid .card input')];
+  const all=boxes.every(b=>b.checked);
+  boxes.forEach(b=>{b.checked=!all;b.closest('.card').classList.toggle('sel',!all)});
+  document.getElementById('btnD').disabled=all;
+}
+
+function renderAll(products) {
+  const grid=document.getElementById('grid'), empty=document.getElementById('empty-msg');
+  grid.innerHTML='';
+  if (!products.length) { empty.classList.remove('hidden'); document.getElementById('tb').classList.add('hidden'); return; }
+  empty.classList.add('hidden');
+  products.forEach(p=>grid.appendChild(makeCard(p)));
+  document.getElementById('tb').classList.remove('hidden');
+  document.getElementById('tb-count').textContent=products.length+' products';
+  document.getElementById('btnD').disabled=true;
+  document.getElementById('attr-section').classList.add('hidden');
+  setPipStage(1);
+}
+
+function makeCard(p) {
+  const d=document.createElement('div');
+  d.className='card'; d.dataset.asin=p.asin;
+  const imgSrc=p.image_path?`/admin/image?path=${encodeURIComponent(p.image_path)}`:'';
+  const chips=Object.entries(p.attributes||{}).slice(0,3).map(([k,v])=>`<span class="chip" title="${k}: ${v}">${k}: ${String(v).slice(0,25)}</span>`).join('');
+  d.innerHTML=`
+    <input type="checkbox" onchange="onChk(this)">
+    ${imgSrc?`<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` :''}
+    <div class="cb">
+      <div class="asn">${p.asin}</div>
+      <div class="ct">${p.title||''}</div>
+      <div class="cm">${p.price!=null?`<span>$${p.price}</span>`:''}${p.category?`<span>${p.category}</span>`:''}</div>
+      ${chips?`<div class="chips">${chips}</div>`:''}
+    </div>`;
+  return d;
+}
+
+function onChk(cb) {
+  cb.closest('.card').classList.toggle('sel',cb.checked);
+  document.getElementById('btnD').disabled=!getSelected().length;
+}
+
+async function doExtract(e) {
+  e.preventDefault();
+  document.getElementById('err-box').classList.add('hidden');
+  document.getElementById('attr-section').classList.add('hidden');
+  const fd=new FormData(document.getElementById('cfg'));
+  const body={
+    html_dir: fd.get('html_dir'),
+    category: fd.get('category')||null,
+    platform: fd.get('platform')||'amazon',
+    max_attrs: parseInt(fd.get('max_attrs'))||15,
+    include: splitTrim(fd.get('include')),
+    exclude: splitTrim(fd.get('exclude')),
+  };
+  setLoading(true);
+  try {
+    const res=await api('POST','/admin/extract',body);
+    jsonFile=res.output_json;
+    renderAll(res.products);
+    setStatus(`${res.products.length} product(s) extracted`,'ok');
+    setPipStage(2);
+  } catch(ex) { setStatus(ex.message,'err'); }
+  finally { setLoading(false); }
+}
+
+async function deleteSelected() {
+  const asins=getSelected(); if(!asins.length) return;
+  try {
+    const res=await api('DELETE','/admin/products',{json_file:jsonFile,asins});
+    asins.forEach(a=>document.querySelector(`[data-asin="${a}"]`)?.remove());
+    const rem=document.querySelectorAll('#grid .card').length;
+    if(!rem) renderAll([]);
+    document.getElementById('btnD').disabled=true;
+    document.getElementById('tb-count').textContent=rem+' products';
+    setStatus(`Removed ${asins.length}. ${res.remaining} remaining.`,'ok');
+  } catch(ex) { setStatus(ex.message,'err'); }
+}
+
+async function ingestAll() {
+  if (!jsonFile) return;
+  setStatus('Ingesting…','busy');
+  document.getElementById('err-box').classList.add('hidden');
+  try {
+    const res=await api('POST','/admin/ingest',{json_file:jsonFile});
+    const stat=res.failed>0?'err':res.inserted>0?'ok':'warn';
+    setStatus(`Inserted: ${res.inserted}  Duplicates: ${res.skipped_duplicate}  Failed: ${res.failed}`,stat);
+    const errBox=document.getElementById('err-box');
+    let html='';
+    if (res.failures?.length)
+      html+=`<div class="err-title">Failed (${res.failures.length}) — logged to failed.log</div><ul>${res.failures.map(f=>`<li><b>${f.asin}</b>: ${f.reason}</li>`).join('')}</ul>`;
+    if (res.duplicates?.length)
+      html+=`<div style="margin-top:6px;color:var(--warn);font-weight:600">Already in DB (${res.duplicates.length})</div><ul>${res.duplicates.map(a=>`<li>${a}</li>`).join('')}</ul>`;
+    if (html) { errBox.innerHTML=html; errBox.className=res.failures?.length?'err-box':'warn-list'; }
+    if (res.inserted>0) { setPipStage(4); setTimeout(fetchStats,500); }
+  } catch(ex) { setStatus(ex.message,'err'); }
+}
+
+// ── Attribute Analysis (steps 2-3) ────────────────────────────────────────────
+async function analyzeAttrs() {
+  if (!jsonFile) { setStatus('Extract products first','err'); return; }
+  const btn=document.getElementById('btnAnalyze');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Analyzing…';
+  setPipStage(2);
+  try {
+    const thr=parseInt(document.getElementById('thr-slider')?.value||50)/100;
+    const res=await api('POST','/admin/analyze',{json_file:jsonFile,threshold:thr});
+    renderAnalysis(res);
+  } catch(ex) { setStatus(ex.message,'err'); }
+  finally { btn.disabled=false; btn.innerHTML='Analyze Attributes'; }
+}
+
+async function reAnalyze() {
+  if (!jsonFile) return;
+  const thr=parseInt(document.getElementById('thr-slider').value)/100;
+  try {
+    const res=await api('POST','/admin/analyze',{json_file:jsonFile,threshold:thr});
+    renderAnalysis(res);
+  } catch(ex) { setStatus(ex.message,'err'); }
+}
+
+function onThrChange(v) {
+  document.getElementById('thr-val').textContent=v;
+  // Re-highlight rows based on new threshold
+  const thr=parseInt(v);
+  document.querySelectorAll('#attr-tbody tr').forEach(tr=>{
+    const pct=parseFloat(tr.dataset.pct)||0;
+    const rec=pct>=thr;
+    tr.classList.toggle('rec',rec);
+    const cb=tr.querySelector('input[type=checkbox]');
+    if (cb) cb.checked=rec;
+  });
+  updateAttrAllCb();
+}
+
+function renderAnalysis(res) {
+  document.getElementById('attr-section').classList.remove('hidden');
+  document.getElementById('thr-slider').value=Math.round(res.threshold*100);
+  document.getElementById('thr-val').textContent=Math.round(res.threshold*100);
+  // Diag pills
+  const d=res.diag||{};
+  document.getElementById('diag-pills').innerHTML=
+    `<span class="dpill">📦 ${d.total||res.total} products</span>`+
+    `<span class="dpill">🆔 ${d.unique_asins||'—'} unique ASINs</span>`+
+    `<span class="dpill">🔁 ${d.duplicates||0} duplicates</span>`+
+    `<span class="dpill">⚠ ${d.missing_mandatory_fields||0} missing mandatory</span>`+
+    `<span class="dpill">🏷 ${Object.keys(res.all_attrs).length} attribute types</span>`;
+  // Table
+  const thr=Math.round(res.threshold*100);
+  const tbody=document.getElementById('attr-tbody');
+  const recSet=new Set(res.recommended);
+  tbody.innerHTML=Object.entries(res.all_attrs).map(([name,pct])=>{
+    const rec=pct>=thr;
+    return `<tr class="${rec?'rec':''}" data-pct="${pct}">
+      <td><input type="checkbox" ${rec?'checked':''} onchange="updateAttrAllCb()"></td>
+      <td style="font-family:monospace">${esc(name)}</td>
+      <td><div class="freq-bar-wrap"><div class="freq-bar ${rec?'':'low'}" style="width:${Math.min(pct,100)}%"></div></div></td>
+      <td style="color:${rec?'var(--ok)':'var(--mu)'}">${pct}%</td>
+    </tr>`;
+  }).join('');
+  updateAttrAllCb();
+  setPipStage(2);
+}
+
+function toggleAllAttrs(master) {
+  document.querySelectorAll('#attr-tbody input[type=checkbox]').forEach(cb=>cb.checked=master.checked);
+}
+
+function updateAttrAllCb() {
+  const all=[...document.querySelectorAll('#attr-tbody input[type=checkbox]')];
+  document.getElementById('attr-all').checked=all.length>0&&all.every(c=>c.checked);
+}
+
+async function applyFilter() {
+  const checked=[...document.querySelectorAll('#attr-tbody tr')].filter(tr=>tr.querySelector('input:checked'));
+  const keep=checked.map(tr=>tr.querySelector('td:nth-child(2)').textContent.trim());
+  if (!keep.length) { setStatus('Select at least one attribute','err'); return; }
+  const btn=document.getElementById('btnApplyFilter');
+  btn.disabled=true;
+  try {
+    const res=await api('POST','/admin/filter',{json_file:jsonFile,keep_attrs:keep});
+    setStatus(`Filter applied — ${keep.length} attributes kept across ${res.filtered} products`,'ok');
+    setPipStage(3);
+  } catch(ex) { setStatus(ex.message,'err'); }
+  finally { btn.disabled=false; }
+}
+
+// ── Import: Data category picker ──────────────────────────────────────────────
+async function refreshDataCats(e) {
+  if (e) e.preventDefault();
+  try {
+    const res=await api('GET','/admin/data-categories');
+    const el=document.getElementById('data-cat-chips');
+    if (!res.categories.length) {
+      el.innerHTML='<span style="color:var(--mu);font-size:12px">No category folders in Data/ — use the Scrape page first.</span>';
+      return;
+    }
+    el.innerHTML=res.categories.map(c=>{
+      const badge=c.html_count>0?`${c.html_count} html`:'empty';
+      const tick=c.json_ready?' · json ✓':'';
+      return `<button class="btn ghost" style="font-size:12px" onclick="selectDataCat('${esc(c.name)}')">${esc(c.name)}<span style="color:var(--mu);font-size:10px;margin-left:5px">(${badge}${tick})</span></button>`;
+    }).join('');
+  } catch(ex) { /* silent */ }
+}
+
+function selectDataCat(name) {
+  document.querySelector('#cfg [name=html_dir]').value='Data/'+name;
+  document.querySelector('#cfg [name=category]').value=name;
+}
+
+// ── Scraper ───────────────────────────────────────────────────────────────────
+let scraperQueries={}, searchProducts=[], activeCat=null;
+
+async function loadQueries() {
+  try { scraperQueries=await api('GET','/scraper/queries'); renderCatList(); setScrStat('',''); }
+  catch(ex) { setScrStat(ex.message,'err'); }
+}
+
+function renderCatList() {
+  const cats=Object.keys(scraperQueries);
+  document.getElementById('qry-cats').innerHTML=cats.map(c=>
+    `<button class="qry-cat-btn ${c===activeCat?'qactive':''}" onclick="selectCat('${esc(c)}')">${esc(c)}<span style="float:right;color:var(--mu)">${scraperQueries[c].length}</span></button>`
+  ).join('');
+}
+
+function selectCat(cat) {
+  if(activeCat) flushCat(activeCat);
+  activeCat=cat;
+  document.getElementById('qry-active-lbl').textContent=cat;
+  const ta=document.getElementById('qry-ta');
+  ta.value=(scraperQueries[cat]||[]).join('\n'); ta.disabled=false;
+  document.getElementById('btnDelCat').disabled=false;
+  renderCatList();
+}
+
+function flushCat(cat) {
+  scraperQueries[cat]=document.getElementById('qry-ta').value.split('\n').map(s=>s.trim()).filter(Boolean);
+}
+
+function addQryCat() {
+  const inp=document.getElementById('new-cat-input'), name=inp.value.trim();
+  if (!name) return;
+  if (!scraperQueries[name]) scraperQueries[name]=[];
+  inp.value=''; renderCatList(); selectCat(name);
+}
+
+function delQryCat() {
+  if (!activeCat) return;
+  delete scraperQueries[activeCat]; activeCat=null;
+  const ta=document.getElementById('qry-ta');
+  ta.value=''; ta.disabled=true;
+  document.getElementById('qry-active-lbl').textContent='—';
+  document.getElementById('btnDelCat').disabled=true;
+  renderCatList();
+}
+
+async function saveQueries() {
+  if(activeCat) flushCat(activeCat); renderCatList();
+  try { await api('POST','/scraper/queries',{queries:scraperQueries}); setScrStat('Queries saved','ok'); }
+  catch(ex) { setScrStat(ex.message,'err'); }
+}
+
+function setScrStat(msg,type) {
+  const el=document.getElementById('sc-stat');
+  if (!msg){el.classList.add('hidden');return;}
+  el.textContent=msg; el.className='tb-stat '+type; el.classList.remove('hidden');
+}
+
+function setScrBusy(elId,on,label) {
+  const b=document.getElementById(elId);
+  b.disabled=on; b.innerHTML=on?`<span class="spin"></span>${label}`:label.replace(/…$/,'');
+}
+
+async function runSearch() {
+  if(activeCat) flushCat(activeCat);
+  setScrBusy('btnSearch',true,'Searching…');
+  setScrStat('Searching Amazon (this may take a while)…','busy');
+  try {
+    const res=await api('POST','/scraper/search',{queries:scraperQueries,data_dir:'Data',sleep:2});
+    searchProducts=res.products;
+    renderSearchTable(res.products);
+    setScrStat(`${res.count} products found`,'ok');
+    document.getElementById('sc-count').textContent=res.count+' products found';
+  } catch(ex) { setScrStat(ex.message,'err'); }
+  finally { setScrBusy('btnSearch',false,'Search Amazon'); }
+}
+
+function renderSearchTable(products) {
+  document.getElementById('sc-tbody').innerHTML=products.map((p,i)=>{
+    const img=p.image_link?`<img src="${esc(p.image_link)}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;background:var(--s2)">`:'—';
+    return `<tr data-idx="${i}">
+      <td><input type="checkbox" onchange="onScRowChk(this)"></td>
+      <td>${img}</td>
+      <td class="asin-tag">${esc(p.asin)}</td>
+      <td>${esc(p.title||'')}</td>
+      <td><span class="cat-tag">${esc(p.category||'')}</span></td>
+      <td style="color:var(--mu)">${esc(p.price||'')}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('sc-table-wrap').classList.remove('hidden');
+  document.getElementById('sc-sel-bar').classList.remove('hidden');
+  document.getElementById('sc-sel-bar').style.display='flex';
+}
+
+function onScRowChk(cb) {
+  cb.closest('tr').classList.toggle('sel',cb.checked);
+  document.getElementById('btnScrapeD').disabled=!document.querySelectorAll('#sc-tbody input:checked').length;
+}
+
+function toggleAllSearch(master) {
+  document.querySelectorAll('#sc-tbody input[type=checkbox]').forEach(cb=>{
+    cb.checked=master.checked; cb.closest('tr').classList.toggle('sel',master.checked);
+  });
+  document.getElementById('btnScrapeD').disabled=!master.checked;
+}
+
+function selectTopN() {
+  const n=parseInt(document.getElementById('topN').value)||10; let count=0;
+  document.querySelectorAll('#sc-tbody tr').forEach(row=>{
+    const cb=row.querySelector('input[type=checkbox]'), on=count<n;
+    cb.checked=on; row.classList.toggle('sel',on); if(on) count++;
+  });
+  document.getElementById('btnScrapeD').disabled=count===0;
+}
+
+function clearSearchSel() {
+  document.querySelectorAll('#sc-tbody input[type=checkbox]').forEach(cb=>{cb.checked=false;cb.closest('tr').classList.remove('sel')});
+  document.getElementById('btnScrapeD').disabled=true;
+  document.getElementById('sc-all').checked=false;
+}
+
+async function runScrape() {
+  const selected=[];
+  document.querySelectorAll('#sc-tbody tr.sel').forEach(row=>{
+    const idx=parseInt(row.dataset.idx);
+    if(searchProducts[idx]) selected.push(searchProducts[idx]);
+  });
+  if(!selected.length) return;
+  setScrBusy('btnScrapeD',true,'Scraping…');
+  setScrStat(`Scraping ${selected.length} product pages…`,'busy');
+  try {
+    const res=await api('POST','/scraper/scrape',{products:selected,data_dir:'Data',sleep:3});
+    setScrStat(`Saved: ${res.saved}  Skipped: ${res.skipped}  Failed: ${res.failed}`,res.failed>0?'err':'ok');
+    renderScrapeFiles(res.files);
+  } catch(ex) { setScrStat(ex.message,'err'); }
+  finally { setScrBusy('btnScrapeD',false,'Scrape Selected →'); }
+}
+
+function renderScrapeFiles(files) {
+  document.getElementById('sc-files-inner').innerHTML='<h3>Saved HTML files</h3>'+files.map(f=>
+    `<div class="bk-row"><span class="nm" style="color:${f.status==='saved'?'var(--ok)':'var(--warn)'}">${f.status==='saved'?'✓':'⚠'} ${esc(f.asin)}</span>`+
+    `<span style="color:var(--mu);font-size:11px">${esc(f.path||f.status)}</span></div>`
+  ).join('');
+  document.getElementById('sc-files').classList.remove('hidden');
+}
+
+// ── Products DB Browser ────────────────────────────────────────────────────────
+let _prdTimer, _prdPage=1, _prdTotal=0;
+
+async function loadDbProductCategories() {
+  try {
+    const res=await api('GET','/admin/db-products?category=all&limit=1');
+    const sel=document.getElementById('prd-cat');
+    const curr=sel.value;
+    sel.innerHTML='<option value="all">All Categories</option>'+
+      (res.categories||[]).map(c=>`<option value="${esc(c)}" ${c===curr?'selected':''}>${esc(c)}</option>`).join('');
+  } catch {}
+}
+
+async function loadDbProducts(page=1) {
+  _prdPage=page;
+  const cat=document.getElementById('prd-cat').value;
+  const search=document.getElementById('prd-search').value.trim();
+  const stat=document.getElementById('prd-stat');
+  stat.textContent='Loading…'; stat.className='tb-stat busy'; stat.classList.remove('hidden');
+  try {
+    const res=await api('GET',`/admin/db-products?category=${encodeURIComponent(cat)}&search=${encodeURIComponent(search)}&page=${page}&limit=48`);
+    _prdTotal=res.total;
+    document.getElementById('prd-total').textContent=`${res.total.toLocaleString()} products`;
+    renderDbGrid(res.products);
+    renderPagination(res.total,page,48);
+    stat.classList.add('hidden');
+  } catch(ex) { stat.textContent=ex.message; stat.className='tb-stat err'; }
+}
+
+function renderDbGrid(products) {
+  const grid=document.getElementById('prd-grid'), empty=document.getElementById('prd-empty');
+  if (!products.length) { grid.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  grid.innerHTML=products.map(p=>{
+    const imgSrc=p.image_path?`/admin/image?path=${encodeURIComponent(p.image_path)}`:'';
+    return `<div class="card" style="cursor:default">
+      <button class="card-del" onclick="deleteDbProduct('${esc(p.id||'')}','${esc(p.asin||'')}',this)" title="Delete from DB">✕</button>
+      ${imgSrc?`<img src="${imgSrc}" alt="" onerror="this.style.display='none'">`:''}
+      <div class="cb">
+        <div class="asn">${esc(p.asin||'#'+p.id)}</div>
+        <div class="ct">${esc(p.title||'Untitled')}</div>
+        <div class="cm">${p.price!=null?`<span>$${p.price}</span>`:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPagination(total,page,limit) {
+  const pages=Math.ceil(total/limit);
+  const el=document.getElementById('prd-pages');
+  if (pages<=1){el.innerHTML='';return;}
+  const maxBtns=7;
+  let btns=[];
+  if(pages<=maxBtns){ for(let i=1;i<=pages;i++) btns.push(i); }
+  else {
+    btns=[1];
+    let lo=Math.max(2,page-2), hi=Math.min(pages-1,page+2);
+    if(lo>2) btns.push('…');
+    for(let i=lo;i<=hi;i++) btns.push(i);
+    if(hi<pages-1) btns.push('…');
+    btns.push(pages);
+  }
+  el.innerHTML=btns.map(b=>typeof b==='number'
+    ?`<button class="page-btn ${b===page?'active':''}" onclick="loadDbProducts(${b})">${b}</button>`
+    :`<span style="color:var(--mu);padding:5px 2px">…</span>`
+  ).join('');
+}
+
+async function deleteDbProduct(id, asin, btn) {
+  if (!confirm(`Delete ASIN ${asin||'#'+id} from the database?`)) return;
+  btn.disabled=true; btn.textContent='…';
+  try {
+    await api('DELETE',`/admin/db-products/${encodeURIComponent(asin)}`);
+    btn.closest('.card').remove();
+    _prdTotal=Math.max(0,_prdTotal-1);
+    document.getElementById('prd-total').textContent=`${_prdTotal.toLocaleString()} products`;
+    setTimeout(fetchStats,300);
+  } catch(ex) { btn.disabled=false; btn.textContent='✕'; alert(ex.message); }
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const s=await api('GET','/admin/settings');
+    document.getElementById('cfg-sleep').value=s.scraper_sleep??2;
+    document.getElementById('cfg-maxpages').value=s.scraper_max_pages??50;
+    document.getElementById('cfg-binary').value=s.browser_binary??'/usr/bin/microsoft-edge';
+    document.getElementById('cfg-threshold').value=s.analysis_threshold??50;
+    document.getElementById('cfg-maxattrs').value=s.max_attrs??15;
+    document.getElementById('cfg-platform').value=s.default_platform??'amazon';
+    document.getElementById('cfg-datadir').value=s.data_dir??'Data';
+  } catch(ex) { setStat('settings-stat',ex.message,'err'); }
+}
+
+async function saveSettings() {
+  const body={
+    scraper_sleep: parseFloat(document.getElementById('cfg-sleep').value)||2,
+    scraper_max_pages: parseInt(document.getElementById('cfg-maxpages').value)||50,
+    browser_binary: document.getElementById('cfg-binary').value.trim(),
+    analysis_threshold: parseInt(document.getElementById('cfg-threshold').value)||50,
+    max_attrs: parseInt(document.getElementById('cfg-maxattrs').value)||15,
+    default_platform: document.getElementById('cfg-platform').value.trim()||'amazon',
+    data_dir: document.getElementById('cfg-datadir').value.trim()||'Data',
+  };
+  try {
+    await api('POST','/admin/settings',body);
+    setStat('settings-stat','Settings saved','ok');
+    setTimeout(()=>document.getElementById('settings-stat').classList.add('hidden'),2500);
+  } catch(ex) { setStat('settings-stat',ex.message,'err'); }
+}
+
+function setStat(id,msg,type) {
+  const el=document.getElementById(id);
+  el.textContent=msg; el.className='tb-stat '+type; el.classList.remove('hidden');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+async function api(method,path,body) {
+  const r=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  if(!r.ok){const e=await r.json().catch(()=>({detail:r.statusText}));throw new Error(e.detail||r.statusText);}
+  return r.json();
+}
+
+// Boot
+go('dashboard');
+refreshDataCats();
+</script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ShopSync</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <!-- Design tokens + component classes -->
+        <link rel="stylesheet" href="/static/global.css" />
+
+        <!--
+            Load order matters:
+            1. Tailwind CDN registers the `tailwind` global
+            2. tailwind.config.js sets tailwind.config on that global
+               so our custom tokens (primary, surface, etc.) are available
+        -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="/static/tailwind.config.js"></script>
+    </head>
+
+    <body class="bg-surface-subtle text-content-secondary">
+        <!-- ── HEADER ──────────────────────────────────────────────────────── -->
+        <header
+            class="glass sticky top-0 z-50 border-b border-surface-border shadow-sm"
+        >
+            <div
+                class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4"
+            >
+                <!-- Logo -->
+                <button
+                    id="btn-home"
+                    class="flex items-center gap-2.5 group shrink-0"
+                >
+                    <span
+                        class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow"
+                    >
+                        <svg
+                            class="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 3v8.4L4.8 18A2 2 0 006.6 21h10.8a2 2 0 001.8-2.96L15 11.4V3"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 3h6M8 14h8"
+                            />
+                        </svg>
+                    </span>
+                    <span
+                        class="text-lg font-semibold tracking-tight text-content group-hover:text-primary-600 transition-colors"
+                    >
+                        Lab<span class="text-primary-600 font-bold"
+                            >Explorer</span
+                        >
+                    </span>
+                </button>
+
+                <!-- Breadcrumb -->
+                <nav
+                    class="hidden sm:flex items-center gap-1.5 text-sm text-content-muted min-w-0"
+                >
+                    <button
+                        id="bc-gallery"
+                        class="hover:text-primary-600 transition-colors hidden shrink-0"
+                    >
+                        Gallery
+                    </button>
+                    <span
+                        id="bc-sep1"
+                        class="text-surface-border hidden shrink-0"
+                        >/</span
+                    >
+                    <span
+                        id="bc-product"
+                        class="text-content font-medium truncate hidden"
+                    ></span>
+                    <span
+                        id="bc-sep2"
+                        class="text-surface-border hidden shrink-0"
+                        >/</span
+                    >
+                    <span
+                        id="bc-compare"
+                        class="text-primary-600 font-medium hidden shrink-0"
+                        >Compare</span
+                    >
+                </nav>
+
+                <!-- Active category badge -->
+                <span
+                    id="header-category-badge"
+                    class="hidden shrink-0 px-3 py-1 rounded-full bg-primary-50 text-primary-600 text-xs font-semibold capitalize"
+                >
+                </span>
+            </div>
+        </header>
+
+        <!-- ── MAIN ─────────────────────────────────────────────────────────── -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- ================================================================
+                 VIEW 1 — GALLERY
+            ================================================================= -->
+            <div id="view-gallery" class="view active">
+                <div class="mb-8 text-center">
+                    <h1 class="text-3xl font-bold text-content">
+                        Product Catalogue
+                    </h1>
+                    <p class="mt-1 text-content-muted text-sm">
+                        Browse by category &middot; click any card for details
+                    </p>
+                </div>
+
+                <!-- Search bar -->
+                <div class="max-w-md mx-auto mb-8 flex gap-2">
+                    <div class="relative flex-1">
+                        <input
+                            type="text"
+                            id="search-input"
+                            placeholder="Search by title..."
+                            class="w-full pl-10 pr-4 py-2 rounded-xl border border-surface-border bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow"
+                        />
+                        <div
+                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                        >
+                            <svg
+                                class="w-5 h-5 text-content-muted"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                ></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <button
+                        id="btn-search"
+                        class="px-4 py-2 rounded-xl bg-primary-600 text-white font-semibold text-sm hover:bg-primary-700 transition-colors shadow-sm"
+                    >
+                        Search
+                    </button>
+                </div>
+
+                <!-- Category pills (skeleton until /categories responds) -->
+                <div
+                    id="category-pills"
+                    class="flex flex-wrap gap-2 justify-center mb-8"
+                >
+                    <div class="skeleton h-9 w-20"></div>
+                    <div class="skeleton h-9 w-24"></div>
+                    <div class="skeleton h-9 w-16"></div>
+                    <div class="skeleton h-9 w-28"></div>
+                    <div class="skeleton h-9 w-20"></div>
+                </div>
+
+                <!-- Product grid -->
+                <div
+                    id="gallery-grid"
+                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+                ></div>
+
+                <!-- Pagination -->
+                <div
+                    id="gallery-pagination"
+                    class="mt-10 flex items-center justify-center gap-3 hidden"
+                >
+                    <button
+                        id="btn-prev"
+                        class="px-4 py-2 rounded-lg border border-surface-border text-sm font-medium text-content-muted bg-surface hover:bg-surface-subtle disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        &larr; Prev
+                    </button>
+                    <span
+                        id="pagination-label"
+                        class="text-sm text-content-muted tabular-nums"
+                    ></span>
+                    <button
+                        id="btn-next"
+                        class="px-4 py-2 rounded-lg border border-surface-border text-sm font-medium text-content-muted bg-surface hover:bg-surface-subtle disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Next &rarr;
+                    </button>
+                </div>
+
+                <!-- Empty state -->
+                <div id="gallery-empty" class="hidden text-center py-24">
+                    <svg
+                        class="mx-auto w-12 h-12 text-content-faint"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5
+                                 M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125V6.375c0-.621-.504-1.125-1.125-1.125H3.375
+                                 c-.621 0-1.125.504-1.125 1.125v.001c0 .621.504 1.124 1.125 1.124z"
+                        />
+                    </svg>
+                    <p class="mt-3 text-content-faint font-medium">
+                        No products found
+                    </p>
+                    <p class="text-sm text-content-faint">
+                        Try selecting a different category.
+                    </p>
+                </div>
+            </div>
+            <!-- end view-gallery -->
+
+            <!-- ================================================================
+                 VIEW 2 — PRODUCT DETAIL + COMPARE
+            ================================================================= -->
+            <div id="view-detail" class="view">
+                <!-- Back link -->
+                <button
+                    id="btn-back-gallery"
+                    class="mb-6 inline-flex items-center gap-1.5 text-sm text-content-muted hover:text-primary-600 transition-colors"
+                >
+                    <svg
+                        class="w-4 h-4 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15 19l-7-7 7-7"
+                        />
+                    </svg>
+                    Back to gallery
+                </button>
+
+                <!-- Detail card -->
+                <div
+                    class="bg-surface rounded-sheet shadow-panel border border-surface-border overflow-hidden"
+                >
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <!-- Image panel -->
+                        <div
+                            class="bg-surface-subtle flex items-center justify-center p-8 min-h-72"
+                        >
+                            <img
+                                id="detail-image"
+                                src=""
+                                alt=""
+                                class="max-h-96 w-full object-contain rounded-panel"
+                            />
+                        </div>
+
+                        <!-- Info panel -->
+                        <div class="p-8 flex flex-col gap-5">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span
+                                    id="detail-platform"
+                                    class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-50 text-primary-700"
+                                ></span>
+                                <span
+                                    id="detail-category"
+                                    class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-subtle text-content-muted capitalize"
+                                ></span>
+                            </div>
+
+                            <h2
+                                id="detail-title"
+                                class="text-xl font-bold text-content leading-snug"
+                            ></h2>
+
+                            <p
+                                id="detail-price"
+                                class="text-2xl font-bold text-primary-600"
+                            ></p>
+
+                            <div>
+                                <h3
+                                    class="text-2xs uppercase tracking-widest font-semibold text-content-faint mb-1.5"
+                                >
+                                    Description
+                                </h3>
+                                <p
+                                    id="detail-description"
+                                    class="text-sm text-content-secondary leading-relaxed line-clamp-5"
+                                ></p>
+                                <button
+                                    id="btn-expand-desc"
+                                    class="mt-1.5 text-xs text-primary-600 hover:underline hidden"
+                                >
+                                    Read more
+                                </button>
+                            </div>
+
+                            <div id="detail-attributes-section">
+                                <h3
+                                    class="text-2xs uppercase tracking-widest font-semibold text-content-faint mb-2"
+                                >
+                                    Attributes
+                                </h3>
+                                <ul
+                                    id="detail-attributes"
+                                    class="space-y-1.5 text-sm"
+                                ></ul>
+                            </div>
+
+                            <div class="pt-1 mt-auto">
+                                <button
+                                    id="btn-compare"
+                                    class="w-full py-3 rounded-xl bg-primary-600 text-white font-semibold text-sm hover:bg-primary-700 active:scale-95 transition-all shadow-panel flex items-center justify-center gap-2"
+                                >
+                                    <svg
+                                        class="w-4 h-4 shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5
+                                                 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5
+                                                 4.5 0 00-3.09 3.09z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375
+                                                 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375
+                                                 3.375 0 00-2.456 2.456z"
+                                        />
+                                    </svg>
+                                    Find Similar Products
+                                </button>
+                            </div>
+                        </div>
+                        <!-- end info panel -->
+                    </div>
+                </div>
+                <!-- end detail card -->
+
+                <!-- ── COMPARE SECTION ──────────────────────────────────────── -->
+                <div id="compare-section" class="mt-10 hidden">
+                    <div
+                        class="flex items-center justify-between mb-6 flex-wrap gap-3"
+                    >
+                        <div>
+                            <h2 class="text-xl font-bold text-content">
+                                Similar Products
+                            </h2>
+                            <p class="text-sm text-content-muted mt-0.5">
+                                Ranked by multimodal embedding similarity
+                            </p>
+                        </div>
+
+                        <div
+                            id="compare-page-controls"
+                            class="flex items-center gap-2 hidden"
+                        >
+                            <button
+                                id="btn-compare-prev"
+                                class="px-3 py-1.5 rounded-lg border border-surface-border text-xs font-medium text-content-muted bg-surface hover:bg-surface-subtle disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                                &larr; Prev
+                            </button>
+                            <span
+                                id="compare-page-label"
+                                class="text-xs text-content-muted px-1 tabular-nums"
+                            ></span>
+                            <button
+                                id="btn-compare-next"
+                                class="px-3 py-1.5 rounded-lg border border-surface-border text-xs font-medium text-content-muted bg-surface hover:bg-surface-subtle disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Next &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Spinner -->
+                    <div
+                        id="compare-loading"
+                        class="hidden py-16 flex flex-col items-center justify-center gap-3"
+                    >
+                        <div class="spinner"></div>
+                        <p class="text-sm text-content-faint">
+                            Generating embedding &amp; searching&hellip;
+                        </p>
+                    </div>
+
+                    <!-- Table -->
+                    <div
+                        class="table-scroll rounded-sheet border border-surface-border shadow-panel bg-surface"
+                    >
+                        <table id="compare-table" class="hidden">
+                            <thead
+                                id="compare-thead"
+                                class="bg-surface-subtle border-b border-surface-border"
+                            ></thead>
+                            <tbody id="compare-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Error -->
+                    <div
+                        id="compare-error"
+                        class="hidden mt-4 rounded-xl border border-danger-light bg-danger-light px-5 py-4 text-sm text-danger-dark"
+                    ></div>
+                </div>
+                <!-- end compare-section -->
+            </div>
+            <!-- end view-detail -->
+        </main>
+
+        <!-- ── TOAST ─────────────────────────────────────────────────────────── -->
+        <div id="toast" class="toast"></div>
+
+        <!--
+            JS load order:
+            1. state.js   — constants, shared state, utilities (no DOM deps)
+            2. gallery.js — depends on state, $, showToast, etc. from state.js
+            3. detail.js  — depends on gallery (showView, updateBreadcrumb)
+            4. compare.js — depends on detail (resetCompareSection called in openProduct)
+            Each file attaches its own event listeners at the bottom.
+            Bootstrapped by the loadCategories() call at the end.
+        -->
+        <script src="/static/js/state.js"></script>
+        <script src="/static/js/gallery.js"></script>
+        <script src="/static/js/detail.js"></script>
+        <script src="/static/js/compare.js"></script>
+        <script>
+            // Bootstrap — start the app once all modules are loaded
+            loadCategories();
+        </script>
+    </body>
+</html>

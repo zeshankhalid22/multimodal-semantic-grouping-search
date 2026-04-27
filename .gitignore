@@ -1,0 +1,31 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+venv/
+
+# Environment
+.env
+
+# Large model files
+*.pt
+*.pth
+
+# Generated output
+output/
+
+# Scraped data (large)
+Data/
+FINAL_Dataset_Phase1/
+
+# Package manager
+uv.lock
+
+# Training datasets (large)
+FINAL_Dataset_Phase1/
